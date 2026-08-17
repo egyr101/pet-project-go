@@ -1,4 +1,4 @@
-package storage
+package database
 
 import (
 	"context"
@@ -8,11 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type Repository struct {
-	db *pgxpool.Pool
-}
-
-func NewRepository(ctx context.Context, cfg config.PostgresConfig) (*Repository, error) {
+func NewPool(ctx context.Context, cfg config.PostgresConfig) (*pgxpool.Pool, error) {
 	poolCfg, err := pgxpool.ParseConfig(cfg.DSN)
 	if err != nil {
 		return nil, fmt.Errorf("parse pool config: %w", err)
@@ -31,5 +27,5 @@ func NewRepository(ctx context.Context, cfg config.PostgresConfig) (*Repository,
 		return nil, fmt.Errorf("ping db: %w", err)
 	}
 
-	return &Repository{db: pool}, nil
+	return pool, nil
 }

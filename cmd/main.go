@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"pet-project/internal/config"
-	"pet-project/internal/storage"
+	"pet-project/internal/database"
 )
 
 func main() {
@@ -12,7 +12,7 @@ func main() {
 		panic(err)
 	}
 
-	db, err := storage.NewRepository(context.Background(), cfg.Postgres)
+	pool, err := database.NewPool(context.Background(), cfg.Postgres)
 	if err != nil {
 		panic(err)
 	}
