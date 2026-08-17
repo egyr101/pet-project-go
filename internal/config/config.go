@@ -1,34 +1,25 @@
 package config
 
 import (
-	"os"
+	"fmt"
 
 	"github.com/joho/godotenv"
+	"github.com/kelseyhightower/envconfig"
 )
 
-type Config struct{
-	HTTPPort string
-	DatabaseURL string
+type Config struct {
+	Server   ServerConfig
+	Postgres PostgresConfig
 }
 
-func Load() (*Config, error){
-	err := godotenv.Load()
-	if err != nil{
-		return nil, ErrorEnvNotFound
+func Load() (Config, error) {
+	var cfg Config
+
+	godotenv.Load()
+
+	if err := envconfig.Process("", &cfg); err != nil {
+		return Config{}, fmt.Errorf("error load config: %w", err)
 	}
 
-	port := os.Getenv("HTTP_Port")
-	if port == ""{
-		return nil, ErrorPortNotFound
-	}
-
-	databaseUrl := os.Getenv("DATABASE_URL")
-	if databaseUrl == ""{
-		return nil, ErrorDatabaseUrlNotFound
-	}
-
-	return &Config{
-		HTTPPort: port,
-		DatabaseURL: databaseUrl,
-	}, nil
+	return cfg, nil
 }
