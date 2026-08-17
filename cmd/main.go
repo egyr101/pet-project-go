@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"log"
 	"pet-project/internal/config"
 	"pet-project/internal/database"
 )
@@ -9,11 +11,15 @@ import (
 func main() {
 	cfg, err := config.Load()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
-	pool, err := database.NewPool(context.Background(), cfg.Postgres)
+	pool, err := database.NewPool(context.Background(), cfg.PostgresConfig)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
+
+	fmt.Println()
+	defer pool.Close()
+
 }
