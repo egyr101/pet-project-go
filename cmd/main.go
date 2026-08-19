@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
+	"pet-project/internal/app"
 	"pet-project/internal/config"
 	"pet-project/internal/database"
 )
@@ -18,8 +18,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	fmt.Println()
 	defer pool.Close()
+
+	err = app.CreateDb(context.Background(), pool, database.CreateTableUser, database.CreateTableCategory, database.CreateTableProduct, database.CreateTableOrder, database.CreateTableOrderItem)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 }
