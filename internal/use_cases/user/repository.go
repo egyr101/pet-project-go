@@ -18,11 +18,11 @@ func NewUserRepository(pool *pgxpool.Pool) *UserRepository {
 	}
 }
 
-func (u UserRepository) GetByID(ctx context.Context, id int) (*models.User, error) {
+func (u UserRepository) Get(ctx context.Context, id int) (*models.User, error) {
 	rows, err := u.db.Query(ctx, `
 		SELECT *
 			FROM users
-			WHERE id = $1
+			WHERE id = $1;
 	`, id)
 
 	if err != nil {
@@ -38,14 +38,32 @@ func (u UserRepository) GetByID(ctx context.Context, id int) (*models.User, erro
 	return &user, nil
 }
 
-func (u *UserRepository) Create(ctx context.Context, userDto createUserDto) error {
-	_, err := u.db.Exec(ctx,
-		`INSERT INTO users(name, email, password_hash, balance)
-		VALUES($1, $2, $3, $4)`, userDto.Name, userDto.Email, userDto.PasswordHash, userDto.Balance)
+func (u *UserRepository) Create(ctx context.Context, userReq userRequest) (int, error) {
+	var id int
+	err := u.db.QueryRow(ctx,
+		`INSERT INTO users(name, email, password_hash)
+		VALUES($1, $2, $3)
+		RETURNING id;`, userReq.Name, userReq.Email, userReq.PasswordHash,
+	).Scan(&id)
 
 	if err != nil {
-		return fmt.Errorf("user.Create error: %w", err)
+		return 0, fmt.Errorf("user.Create error: %w", err)
 	}
 
-	return nil
+	return id, nil
+}
+
+func (u *UserRepository) Delete(ctx context.Context, userId int) (int, error) {
+	var id int
+
+	err := u.db.QueryRow(ctx,
+		`DELETE FROM users
+		WHERE id = $1`, id,
+	).Scan(&id)
+
+	if err != nil {
+		return 0, fmt.Errorf("user.Delete error: %w", err)
+	}
+
+	return id, nil
 }
