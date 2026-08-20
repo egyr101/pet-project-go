@@ -12,9 +12,9 @@ func NewUserService(repo *UserRepository) *UserService {
 	}
 }
 
-func (u UserService) GetByID(ctx context.Context, id int) (*userResponse, error) {
+func (u UserService) Get(ctx context.Context, id int) (*userResponse, error) {
 
-	user, err := u.repo.GetByID(ctx, id)
+	user, err := u.repo.Get(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -39,6 +39,16 @@ func (u *UserService) Create(ctx context.Context, userReq userRequest) (int, err
 func (u *UserService) Delete(ctx context.Context, userId int) (int, error) {
 
 	id, err := u.repo.Delete(ctx, userId)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, err
+}
+
+func (u *UserService) Update(ctx context.Context, userId int, userReq userRequest) (int, error) {
+
+	id, err := u.repo.Update(ctx, userId, userReq)
 	if err != nil {
 		return 0, err
 	}

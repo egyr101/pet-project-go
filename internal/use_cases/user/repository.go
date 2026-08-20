@@ -67,3 +67,22 @@ func (u *UserRepository) Delete(ctx context.Context, userId int) (int, error) {
 
 	return id, nil
 }
+
+func (u *UserRepository) Update(ctx context.Context, userId int, userReq userRequest) (int, error) {
+
+	var id int
+
+	err := u.db.QueryRow(ctx,
+		`UPDATE users SET
+			name = $1,
+			email = $2,
+			password_hash = $3
+		WHERE id = $4
+		RETURNING id`, userReq.Name, userReq.Email, userReq.PasswordHash, userId,
+	).Scan(&id)
+	if err != nil {
+		return 0, fmt.Errorf("user.Update error: %w", err)
+	}
+
+	return id, nil
+}
