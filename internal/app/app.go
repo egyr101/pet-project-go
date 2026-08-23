@@ -7,6 +7,7 @@ import (
 	"pet-project/internal/config"
 	"pet-project/internal/database"
 	"pet-project/internal/logger"
+	"pet-project/internal/middlewares"
 	"pet-project/internal/use_cases/user"
 )
 
@@ -27,15 +28,15 @@ func New(cfg *config.Config) (*App, error) {
 
 	mux := http.NewServeMux()
 
-	getUserHandler := http.HandlerFunc(user.GetUserHandler(userService))
-	createUserHandler := http.HandlerFunc(user.CreateUserHandler(userService))
-	updateUserHandler := http.HandlerFunc(user.UpdateUserHandler(userService))
-	deleteUserHandler := http.HandlerFunc(user.DeleteUserHandler(userService))
+	getUserHandler := http.Handler(middlewares.RequestID(middlewares.Recovery(middlewares.Logger(user.GetUserHandler(userService)))))
+	createUserHandler := http.Handler(middlewares.RequestID(middlewares.Recovery(middlewares.Logger(user.CreateUserHandler(userService)))))
+	updateUserHandler := http.Handler(middlewares.RequestID(middlewares.Recovery(middlewares.Logger(user.UpdateUserHandler(userService)))))
+	deleteUserHandler := http.Handler(middlewares.RequestID(middlewares.Recovery(middlewares.Logger(user.DeleteUserHandler(userService)))))
 
-	mux.HandleFunc("GET /user/{id}", getUserHandler)
-	mux.HandleFunc("POST /user", createUserHandler)
-	mux.HandleFunc("UPDATE /user/{id}", updateUserHandler)
-	mux.HandleFunc("DELETE /user/{id}", deleteUserHandler)
+	mux.Handle("GET /user/{id}", getUserHandler)
+	mux.Handle("POST /user", createUserHandler)
+	mux.Handle("UPDATE /user/{id}", updateUserHandler)
+	mux.Handle("DELETE /user/{id}", deleteUserHandler)
 
 	app.server = &http.Server{
 		Handler:      mux,
