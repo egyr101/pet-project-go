@@ -1,6 +1,11 @@
 package user
 
-import "context"
+import (
+	"context"
+	"fmt"
+
+	"golang.org/x/crypto/bcrypt"
+)
 
 type UserService struct {
 	repo *UserRepository
@@ -30,7 +35,18 @@ func (u UserService) Get(ctx context.Context, id int) (*userResponse, error) {
 	}, nil
 }
 
-func (u *UserService) Create(ctx context.Context, userReq userRequest) (int, error) {
+func (u *UserService) Create(ctx context.Context, userReq *userRequest) (int, error) {
+
+	if len(userReq.Password) < 8 {
+		return 0, fmt.Errorf("err validation password")
+	}
+
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(userReq.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return 0, fmt.Errorf("err hashing password: %w", err)
+	}
+
+	userReq.PasswordHash = string(passwordHash)
 
 	id, err := u.repo.Create(ctx, userReq)
 	if err != nil {

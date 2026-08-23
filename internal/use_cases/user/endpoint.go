@@ -2,6 +2,7 @@ package user
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"strconv"
 )
@@ -33,20 +34,42 @@ func GetUserHandler(service *UserService) http.Handler {
 	})
 }
 
-func CreateUserHandler(service *UserService) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
+func CreateUserHandler(service *UserService) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		userData, err := io.ReadAll(r.Body)
+		defer r.Body.Close()
+		if err != nil {
+			http.Error(w, "error read body", http.StatusBadRequest)
+			return
+		}
 
-	}
+		var userReq userRequest
+
+		err = json.Unmarshal(userData, &userReq)
+		if err != nil {
+			http.Error(w, "error decoding json :"+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		id, err := service.Create(r.Context(), &userReq)
+		if err != nil {
+			http.Error(w, "error creating user", http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusCreated)
+		w.Write([]byte(strconv.Itoa(id)))
+	})
 }
 
-func UpdateUserHandler(service *UserService) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
+func UpdateUserHandler(service *UserService) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-	}
+	})
 }
 
-func DeleteUserHandler(service *UserService) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
+func DeleteUserHandler(service *UserService) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-	}
+	})
 }

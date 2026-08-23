@@ -43,7 +43,7 @@ func (u UserRepository) Get(ctx context.Context, id int) (*models.User, error) {
 	return &user, nil
 }
 
-func (u *UserRepository) Create(ctx context.Context, userReq userRequest) (int, error) {
+func (u *UserRepository) Create(ctx context.Context, userReq *userRequest) (int, error) {
 	var id int
 	err := u.db.QueryRow(ctx,
 		`INSERT INTO users(name, email, password_hash)
