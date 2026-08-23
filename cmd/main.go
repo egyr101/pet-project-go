@@ -1,28 +1,26 @@
 package main
 
 import (
-	"context"
-	"log"
 	"pet-project/internal/app"
 	"pet-project/internal/config"
-	"pet-project/internal/database"
+	"pet-project/internal/logger"
 )
 
 func main() {
 	cfg, err := config.Load()
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 
-	pool, err := database.NewPool(context.Background(), cfg.PostgresConfig)
+	app, err := app.New(&cfg)
+	err = app.Run()
 	if err != nil {
-		log.Fatal(err)
+		logger.Error(err.Error())
 	}
-	defer pool.Close()
 
-	err = app.CreateDb(context.Background(), pool, database.CreateTableUser, database.CreateTableCategory, database.CreateTableProduct, database.CreateTableOrder, database.CreateTableOrderItem)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// err = app.CreateDb(context.Background(), pool, database.CreateTableUser, database.CreateTableCategory, database.CreateTableProduct, database.CreateTableOrder, database.CreateTableOrderItem)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
 }
