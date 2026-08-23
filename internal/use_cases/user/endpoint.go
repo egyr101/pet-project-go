@@ -62,13 +62,31 @@ func CreateUserHandler(service *UserService) http.Handler {
 	})
 }
 
-func UpdateUserHandler(service *UserService) http.Handler {
+func DeleteUserHandler(service *UserService) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		data := r.PathValue("id")
+		id, err := strconv.Atoi(data)
+		if err != nil {
+			http.Error(w, "id is not valid", http.StatusBadRequest)
+			return
+		}
 
+		id, err = service.Delete(r.Context(), id)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if id == 0 {
+			http.NotFound(w, r)
+			return
+		}
+
+		w.Write([]byte(strconv.Itoa(id)))
 	})
 }
 
-func DeleteUserHandler(service *UserService) http.Handler {
+func UpdateUserHandler(service *UserService) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 	})

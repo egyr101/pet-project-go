@@ -63,10 +63,14 @@ func (u *UserRepository) Delete(ctx context.Context, userId int) (int, error) {
 
 	err := u.db.QueryRow(ctx,
 		`DELETE FROM users
-		WHERE id = $1`, id,
+		WHERE id = $1
+		RETURNING id`, userId,
 	).Scan(&id)
 
 	if err != nil {
+		if err == pgx.ErrNoRows {
+			return 0, nil
+		}
 		return 0, fmt.Errorf("user.Delete error: %w", err)
 	}
 
