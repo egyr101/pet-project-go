@@ -15,10 +15,14 @@ func NewUserService(repo *UserRepository) *UserService {
 func (u UserService) Get(ctx context.Context, id int) (*userResponse, error) {
 
 	user, err := u.repo.Get(ctx, id)
+
 	if err != nil {
 		return nil, err
 	}
 
+	if user == nil {
+		return nil, err
+	}
 	return &userResponse{
 		Name:    user.Name,
 		Email:   user.Email,

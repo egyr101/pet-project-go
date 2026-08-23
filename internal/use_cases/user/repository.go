@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"pet-project/internal/models"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -19,20 +20,24 @@ func NewUserRepository(pool *pgxpool.Pool) *UserRepository {
 }
 
 func (u UserRepository) Get(ctx context.Context, id int) (*models.User, error) {
-	rows, err := u.db.Query(ctx, `
+	var user models.User
+	err := u.db.QueryRow(ctx, `
 		SELECT *
 			FROM users
 			WHERE id = $1;
-	`, id)
+	`, id).Scan(
+		&user.ID,
+		&user.Name,
+		&user.Email,
+		&user.PasswordHash,
+		&user.Balance,
+	)
 
 	if err != nil {
-		return nil, fmt.Errorf("user.GetByID error: %w", err)
-	}
-
-	var user models.User
-
-	if err := rows.Scan(&user); err != nil {
-		return nil, fmt.Errorf("user.GetByID error: %w", err)
+		if err == pgx.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("user.Get error: %w", err)
 	}
 
 	return &user, nil
