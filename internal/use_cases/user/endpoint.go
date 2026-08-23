@@ -30,7 +30,6 @@ func GetUserHandler(service *UserService) http.Handler {
 		if err != nil {
 			http.Error(w, "error encode json", http.StatusInternalServerError)
 		}
-		w.WriteHeader(http.StatusOK)
 	})
 }
 
