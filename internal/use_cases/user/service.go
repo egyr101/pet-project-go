@@ -66,7 +66,18 @@ func (u *UserService) Delete(ctx context.Context, userId int) (int, error) {
 	return id, err
 }
 
-func (u *UserService) Update(ctx context.Context, userId int, userReq userRequest) (int, error) {
+func (u *UserService) Update(ctx context.Context, userId int, userReq *userRequest) (int, error) {
+
+	if len(userReq.Password) < 8 {
+		return 0, fmt.Errorf("err validation password")
+	}
+
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(userReq.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return 0, fmt.Errorf("err hashing password: %w", err)
+	}
+
+	userReq.PasswordHash = string(passwordHash)
 
 	id, err := u.repo.Update(ctx, userId, userReq)
 	if err != nil {

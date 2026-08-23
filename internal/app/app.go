@@ -35,7 +35,7 @@ func New(cfg *config.Config) (*App, error) {
 
 	mux.Handle("GET /user/{id}", getUserHandler)
 	mux.Handle("POST /user", createUserHandler)
-	mux.Handle("UPDATE /user/{id}", updateUserHandler)
+	mux.Handle("PUT /user/{id}", updateUserHandler)
 	mux.Handle("DELETE /user/{id}", deleteUserHandler)
 
 	app.server = &http.Server{

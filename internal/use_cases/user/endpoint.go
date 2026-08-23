@@ -82,12 +82,47 @@ func DeleteUserHandler(service *UserService) http.Handler {
 			return
 		}
 
+		w.WriteHeader(http.StatusNoContent)
 		w.Write([]byte(strconv.Itoa(id)))
 	})
 }
 
 func UpdateUserHandler(service *UserService) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		idPath := r.PathValue("id")
 
+		id, err := strconv.Atoi(idPath)
+		if err != nil {
+			http.Error(w, "id is not valid", http.StatusBadRequest)
+			return
+		}
+
+		userData, err := io.ReadAll(r.Body)
+		defer r.Body.Close()
+		if err != nil {
+			http.Error(w, "err read body", http.StatusBadRequest)
+			return
+		}
+
+		var userReq userRequest
+		err = json.Unmarshal(userData, &userReq)
+		if err != nil {
+			http.Error(w, "error decoding json", http.StatusInternalServerError)
+			return
+		}
+
+		id, err = service.Update(r.Context(), id, &userReq)
+		if err != nil {
+			http.Error(w, "error updating user", http.StatusInternalServerError)
+			return
+		}
+
+		if id == 0 {
+			http.NotFound(w, r)
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+		w.Write([]byte(strconv.Itoa(id)))
 	})
 }
